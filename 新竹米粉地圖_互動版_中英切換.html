@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>新竹米粉地圖 | Hsinchu Rice Noodle Map</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+  <style>
+    body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"PingFang TC","Noto Sans TC","Microsoft JhengHei",sans-serif;background:#faf7f2;color:#222}
+    header{background:#c62828;color:#fff;padding:14px 18px;display:flex;align-items:center;gap:12px}
+    header h1{margin:0;font-size:1.2rem}
+    header .spacer{flex:1}
+    header button{background:#fff;color:#c62828;border:none;border-radius:8px;padding:6px 10px;font-weight:700;cursor:pointer}
+    #map{height:62vh}
+    main{max-width:1000px;margin:auto;padding:14px}
+    .panel{background:#fff;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.06);padding:14px;margin-bottom:14px}
+    .list{display:grid;grid-template-columns:1fr;gap:10px}
+    @media(min-width:760px){.list{grid-template-columns:1fr 1fr}}
+    .item{border-left:6px solid #c62828;border-radius:10px;padding:10px}
+    .item h3{margin:0 0 6px}
+    .links a{margin-right:10px;color:#c62828;font-weight:700;text-decoration:none}
+    .stars span{font-size:1.3rem;cursor:pointer;color:#ccc}
+    .stars span.active{color:#f6b400}
+    textarea{width:100%;min-height:70px;border-radius:8px;border:1px solid #ddd;padding:8px}
+    footer{color:#666;font-size:.9rem;padding:10px 14px}
+  </style>
+</head>
+<body>
+<header>
+  <h1 id="title">新竹米粉地圖</h1>
+  <div class="spacer"></div>
+  <button id="langBtn">EN</button>
+</header>
+
+<div id="map"></div>
+
+<main>
+  <section class="panel">
+    <h2 id="routeTitle">📍 路線說明</h2>
+    <p id="routeDesc">以新竹火車站與城隍廟為核心，步行可達的經典米粉店。點擊地圖紅點可查看並前往 Google 地圖。</p>
+    <p class="links">
+      <a href="https://www.google.com/maps/search/?api=1&query=新竹火車站" target="_blank" rel="noopener">新竹火車站</a>
+      <a href="https://www.google.com/maps/search/?api=1&query=新竹城隍廟" target="_blank" rel="noopener">新竹城隍廟</a>
+    </p>
+  </section>
+
+  <section class="panel">
+    <h2 id="listTitle">🍜 店家清單（可評分）</h2>
+    <div class="list" id="shopList"></div>
+  </section>
+
+  <section class="panel">
+    <h2 id="fbTitle">💬 意見回饋</h2>
+    <p id="fbDesc">此回饋僅儲存在你的瀏覽器（local）。</p>
+    <textarea id="feedback" placeholder="寫下你對這張地圖的建議…"></textarea>
+  </section>
+</main>
+
+<footer>
+  <p id="foot">提示：評分與回饋使用瀏覽器 localStorage，重新整理仍會保留。</p>
+</footer>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+  const shops = [
+    {
+      id:"dongmen",
+      zh:{name:"東門米粉攤（東門市場）",desc:"在地人氣、芋頭米粉湯代表"},
+      en:{name:"Dongmen Rice Noodles (Dongmen Market)",desc:"Local favorite with taro rice noodle soup"},
+      lat:24.8046, lng:120.9715,
+      g:"https://www.google.com/maps/search/?api=1&query=東門米粉攤 新竹"
+    },
+    {
+      id:"acheng",
+      zh:{name:"阿城米粉",desc:"靠近城隍廟，湯頭清甜"},
+      en:{name:"A-Cheng Rice Noodles",desc:"Near Chenghuang Temple; light, sweet broth"},
+      lat:24.8039, lng:120.9659,
+      g:"https://www.google.com/maps/search/?api=1&query=阿城米粉 新竹"
+    },
+    {
+      id:"temple",
+      zh:{name:"城隍廟口米粉",desc:"廟口小吃聚集地"},
+      en:{name:"Chenghuang Temple Rice Noodles",desc:"Temple-front street food area"},
+      lat:24.8043, lng:120.9666,
+      g:"https://www.google.com/maps/search/?api=1&query=城隍廟口 米粉 新竹"
+    },
+    {
+      id:"zhenji",
+      zh:{name:"珍記米粉湯",desc:"火車站周邊老字號"},
+      en:{name:"Zhen Ji Rice Noodle Soup",desc:"Classic shop near the train station"},
+      lat:24.8019, lng:120.9719,
+      g:"https://www.google.com/maps/search/?api=1&query=珍記米粉湯 新竹"
+    },
+    {
+      id:"central",
+      zh:{name:"中央市場米粉攤",desc:"市場系風味，早午餐熱鬧"},
+      en:{name:"Central Market Rice Noodles",desc:"Market-style noodles, busy mornings"},
+      lat:24.8032, lng:120.9736,
+      g:"https://www.google.com/maps/search/?api=1&query=中央市場 米粉 新竹"
+    },
+    {
+      id:"old",
+      zh:{name:"老新竹米粉（城隍廟周邊）",desc:"傳統作法，清爽耐吃"},
+      en:{name:"Old Hsinchu Rice Noodles",desc:"Traditional style near the temple"},
+      lat:24.8035, lng:120.9660,
+      g:"https://www.google.com/maps/search/?api=1&query=老新竹 米粉 城隍廟"
+    }
+  ];
+
+  let lang = "zh";
+  const map = L.map('map').setView([24.8039,120.9698], 15);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 19, attribution: '&copy; OpenStreetMap'
+  }).addTo(map);
+
+  const redIcon = new L.Icon({
+    iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png',
+    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
+    iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41]
+  });
+
+  const markers = {};
+  function renderMarkers(){
+    Object.values(markers).forEach(m=>map.removeLayer(m));
+    shops.forEach(s=>{
+      const m = L.marker([s.lat,s.lng],{icon:redIcon}).addTo(map);
+      m.bindPopup(`<b>${lang==='zh'?s.zh.name:s.en.name}</b><br/>
+        ${lang==='zh'?s.zh.desc:s.en.desc}<br/>
+        <a href="${s.g}" target="_blank">Google Maps</a>`);
+      markers[s.id]=m;
+    });
+  }
+
+  function starUI(id){
+    const val = Number(localStorage.getItem('rate_'+id)||0);
+    let html = '<div class="stars" data-id="'+id+'">';
+    for(let i=1;i<=5;i++){
+      html += '<span class="'+(i<=val?'active':'')+'">★</span>';
+    }
+    html += '</div>';
+    return html;
+  }
+
+  function renderList(){
+    const el = document.getElementById('shopList');
+    el.innerHTML = shops.map(s=>`
+      <div class="item">
+        <h3>${lang==='zh'?s.zh.name:s.en.name}</h3>
+        <p>${lang==='zh'?s.zh.desc:s.en.desc}</p>
+        ${starUI(s.id)}
+        <div class="links"><a href="${s.g}" target="_blank">Google Maps</a></div>
+      </div>
+    `).join('');
+    document.querySelectorAll('.stars').forEach(st=>{
+      st.querySelectorAll('span').forEach((sp,i)=>{
+        sp.onclick=()=>{
+          localStorage.setItem('rate_'+st.dataset.id, i+1);
+          renderList();
+        }
+      })
+    })
+  }
+
+  function applyLang(){
+    document.getElementById('title').textContent = lang==='zh'?'新竹米粉地圖':'Hsinchu Rice Noodle Map';
+    document.getElementById('routeTitle').textContent = lang==='zh'?'📍 路線說明':'📍 Route';
+    document.getElementById('routeDesc').textContent = lang==='zh'
+      ?'以新竹火車站與城隍廟為核心，步行可達的經典米粉店。點擊地圖紅點可查看並前往 Google 地圖。'
+      :'Walkable classic rice noodle shops around Hsinchu Train Station and Chenghuang Temple. Click red markers for Google Maps.';
+    document.getElementById('listTitle').textContent = lang==='zh'?'🍜 店家清單（可評分）':'🍜 Shop List (Rate it)';
+    document.getElementById('fbTitle').textContent = lang==='zh'?'💬 意見回饋':'💬 Feedback';
+    document.getElementById('fbDesc').textContent = lang==='zh'?'此回饋僅儲存在你的瀏覽器（local）。':'Feedback is stored locally in your browser.';
+    document.getElementById('foot').textContent = lang==='zh'
+      ?'提示：評分與回饋使用瀏覽器 localStorage，重新整理仍會保留。'
+      :'Tip: Ratings and feedback are saved locally via localStorage.';
+    document.getElementById('langBtn').textContent = lang==='zh'?'EN':'中文';
+    renderMarkers(); renderList();
+  }
+
+  document.getElementById('langBtn').onclick=()=>{ lang = (lang==='zh'?'en':'zh'); applyLang(); };
+  const fb = document.getElementById('feedback');
+  fb.value = localStorage.getItem('feedback')||'';
+  fb.oninput=()=>localStorage.setItem('feedback', fb.value);
+
+  applyLang();
+</script>
+</body>
+</html>
