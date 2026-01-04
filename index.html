@@ -197,5 +197,19 @@
 
   applyLang();
 </script>
+<script>
+fetch("【貼你的Google Sheets CSV 連結】")
+  .then(res => res.text())
+  .then(text => {
+    const rows = text.split("\n");
+    const avg = rows[1].split(",")[0];
+    const count = rows[1].split(",")[1];
+
+    document.getElementById("avg-acheng").innerText =
+      Number(avg).toFixed(1);
+
+    document.getElementById("count-acheng").innerText = count;
+  });
+</script>
 </body>
 </html>
