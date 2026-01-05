@@ -104,10 +104,13 @@ window.onload = function(){
 /* ===== 語言 ===== */
 let lang = "zh";
 
-/* ===== 新竹火車站座標 ===== */
+/* ===== 新竹火車站 ===== */
 const station = { lat:24.8019, lng:120.9715 };
 
-/* ===== 店家資料（問卷版本 4 家） ===== */
+/* ===== 米粉公會介紹頁（可自行換網址） ===== */
+const associationUrl = "https://www.example.com";
+
+/* ===== 店家資料 ===== */
 const shops = [
   { zh:"阿城米粉", en:"A-Cheng Rice Noodles", lat:24.8039, lng:120.9659 },
   { zh:"東門米粉攤", en:"Dongmen Market Rice Noodles", lat:24.8046, lng:120.9715 },
@@ -115,7 +118,7 @@ const shops = [
   { zh:"珍記米粉湯", en:"Zhen-Ji Rice Noodle Soup", lat:24.8071, lng:120.9712 }
 ];
 
-/* ===== 距離計算（公尺） ===== */
+/* ===== 距離計算 ===== */
 function distanceMeter(a, b){
   const R = 6371000;
   const dLat = (b.lat - a.lat) * Math.PI / 180;
@@ -124,16 +127,14 @@ function distanceMeter(a, b){
   const lat2 = b.lat * Math.PI / 180;
 
   const x =
-    Math.sin(dLat/2) * Math.sin(dLat/2) +
-    Math.sin(dLng/2) * Math.sin(dLng/2) * Math.cos(lat1) * Math.cos(lat2);
+    Math.sin(dLat/2)**2 +
+    Math.sin(dLng/2)**2 * Math.cos(lat1) * Math.cos(lat2);
 
   return R * 2 * Math.atan2(Math.sqrt(x), Math.sqrt(1-x));
 }
 
-/* ===== 步行時間（分鐘） ===== */
 function walkMinutes(shop){
-  const m = distanceMeter(station, shop);
-  return Math.max(1, Math.round(m / 80));
+  return Math.max(1, Math.round(distanceMeter(station, shop) / 60));
 }
 
 /* ===== 地圖 ===== */
@@ -141,37 +142,31 @@ const map = L.map("map").setView([24.805,120.97],16);
 
 L.tileLayer(
   "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
-  {
-    maxZoom:19,
-    detectRetina:true,
-    attribution:"© OpenStreetMap"
-  }
+  { maxZoom:19, detectRetina:true, attribution:"© OpenStreetMap" }
 ).addTo(map);
 
-/* ===== Marker ===== */
 let markers = [];
 
+/* ===== Marker ===== */
 function renderMarkers(){
   markers.forEach(m => map.removeLayer(m));
   markers = [];
 
-  shops.forEach((s, i) => {
-    const name = lang==="zh" ? s.zh : s.en;
+  shops.forEach((s,i)=>{
+    const name = lang==="zh"?s.zh:s.en;
     const mins = walkMinutes(s);
 
-    const marker = L.marker([s.lat, s.lng]).addTo(map);
+    const marker = L.marker([s.lat,s.lng]).addTo(map);
 
     marker.bindPopup(`
       <b>${name}</b><br>
-      ${lang==="zh" ? `步行約 ${mins} 分鐘` : `~${mins} min walk`}<br>
+      ${lang==="zh"?`🚶‍♂️ 步行約 ${mins} 分鐘`:`🚶 ~${mins} min walk`}<br>
       <a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(name)}"
-         target="_blank">
-        Google Maps
-      </a>
+         target="_blank">Google Maps</a>
     `);
 
-    marker.on("click", () => {
-      map.flyTo([s.lat, s.lng], 18, { animate:true });
+    marker.on("click",()=>{
+      map.flyTo([s.lat,s.lng],18,{animate:true});
       marker.openPopup();
     });
 
@@ -179,47 +174,70 @@ function renderMarkers(){
   });
 }
 
-/* ===== 語言與列表 ===== */
+/* ===== 插入米粉公會介紹區塊 ===== */
+function insertAssociationBlock(){
+  if(document.getElementById("associationBlock")) return;
+
+  const block = document.createElement("section");
+  block.id = "associationBlock";
+  block.className = "panel";
+  block.style.margin = "16px";
+
+  block.innerHTML = `
+    <h2>${lang==="zh"?"📜 新竹米粉產業介紹":"📜 Hsinchu Rice Noodle Association"}</h2>
+    <p>
+      ${lang==="zh"
+        ?"想更深入了解新竹米粉的歷史、製作工法與產業文化，可參考新竹米粉公會的官方介紹頁面。"
+        :"Learn more about the history, craftsmanship, and culture of Hsinchu rice noodles."}
+    </p>
+    <a href="${associationUrl}" target="_blank"
+       style="display:inline-block;margin-top:8px;font-weight:700;color:#c62828">
+      👉 ${lang==="zh"?"前往米粉公會介紹":"Visit Official Introduction"}
+    </a>
+  `;
+
+  const header = document.querySelector("header");
+  header.after(block);
+}
+
+/* ===== 語言 ===== */
 function applyLang(){
   document.getElementById("title").textContent =
-    lang==="zh" ? "新竹米粉地圖" : "Hsinchu Rice Noodle Map";
+    lang==="zh"?"新竹米粉地圖":"Hsinchu Rice Noodle Map";
 
   document.getElementById("rateTitle").textContent =
-    lang==="zh" ? "🍜 店家列表" : "🍜 Shop List";
+    lang==="zh"?"🍜 店家列表":"🍜 Shop List";
 
   document.getElementById("formTitle").textContent =
-    lang==="zh" ? "📝 我要評分" : "📝 Rate a Shop";
+    lang==="zh"?"📝 我要評分":"📝 Rate a Shop";
 
   document.getElementById("langBtn").textContent =
-    lang==="zh" ? "EN" : "中文";
+    lang==="zh"?"EN":"中文";
 
   renderMarkers();
+  insertAssociationBlock();
 
   document.getElementById("shopList").innerHTML =
-    shops.map((s,i) => {
-      const name = lang==="zh" ? s.zh : s.en;
+    shops.map((s,i)=>{
+      const name = lang==="zh"?s.zh:s.en;
       const mins = walkMinutes(s);
       return `
         <div class="item" style="cursor:pointer" onclick="focusShop(${i})">
           <b>${name}</b><br>
-          <small>
-            ${lang==="zh" ? `🚶‍♂️ 步行約 ${mins} 分鐘` : `🚶 ~${mins} min walk`}
-          </small>
+          <small>${lang==="zh"?`🚶‍♂️ 步行約 ${mins} 分鐘`:`🚶 ~${mins} min walk`}</small>
         </div>
       `;
     }).join("");
 }
 
-/* ===== 點列表飛過去 ===== */
+/* ===== 點列表 ===== */
 window.focusShop = function(i){
-  const s = shops[i];
-  map.flyTo([s.lat, s.lng], 18, { animate:true });
+  map.flyTo([shops[i].lat,shops[i].lng],18,{animate:true});
   markers[i].openPopup();
 };
 
-/* ===== 語言按鈕 ===== */
-document.getElementById("langBtn").onclick = () => {
-  lang = lang==="zh" ? "en" : "zh";
+document.getElementById("langBtn").onclick = ()=>{
+  lang = lang==="zh"?"en":"zh";
   applyLang();
 };
 
@@ -228,6 +246,5 @@ applyLang();
 
 };
 </script>
-
 </body>
 </html>
