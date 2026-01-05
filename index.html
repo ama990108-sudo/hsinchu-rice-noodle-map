@@ -1,85 +1,164 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>新竹米粉地圖</title>
+
+<!-- ✅ Leaflet CSS（一定要有） -->
+<link
+  rel="stylesheet"
+  href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+/>
+
+<style>
+body{
+  margin:0;
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang TC","Noto Sans TC","Microsoft JhengHei",sans-serif;
+  background:#faf7f2;
+}
+header{
+  background:#c62828;
+  color:#fff;
+  padding:12px 16px;
+  display:flex;
+  align-items:center;
+}
+header h1{margin:0;font-size:1.2rem}
+header .spacer{flex:1}
+header button{
+  background:#fff;
+  color:#c62828;
+  border:none;
+  border-radius:20px;
+  padding:6px 14px;
+  font-weight:700;
+  cursor:pointer;
+}
+#map{
+  height:520px;
+  width:100%;
+}
+main{
+  max-width:1100px;
+  margin:auto;
+  padding:16px;
+}
+.panel{
+  background:#fff;
+  border-radius:16px;
+  box-shadow:0 4px 12px rgba(0,0,0,.08);
+  padding:16px;
+  margin-bottom:16px;
+}
+.item{
+  border-left:6px solid #c62828;
+  border-radius:12px;
+  padding:12px;
+  margin-bottom:10px;
+}
+.footer{
+  text-align:center;
+  font-size:.85rem;
+  color:#666;
+  margin:20px 0;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <h1 id="title">新竹米粉地圖</h1>
+  <div class="spacer"></div>
+  <button id="langBtn">EN</button>
+</header>
+
+<div id="map"></div>
+
+<main>
+  <section class="panel">
+    <h2 id="rateTitle">🍜 店家列表</h2>
+    <div id="shopList"></div>
+  </section>
+
+  <section class="panel">
+    <h2 id="formTitle">📝 我要評分</h2>
+    <a
+      href="https://docs.google.com/forms/d/e/1FAIpQLSc30CvEspcBPhKd2W_ylALFxNIFLKsiv2afyXhGM674qEzFVQ/viewform"
+      target="_blank"
+    >
+      👉 前往 Google 表單填寫評分
+    </a>
+  </section>
+</main>
+
+<div class="footer">© Hsinchu Rice Noodle Map</div>
+
+<!-- ✅ Leaflet JS（一定要在 script 前） -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
 <script>
 window.onload = function(){
 
-/* ===== 語言 ===== */
 let lang = "zh";
 
-/* ===== 店家資料 ===== */
 const shops = [
-  {id:"acheng", zh:"阿城米粉", en:"A-Cheng Rice Noodles", lat:24.8039, lng:120.9659},
-  {id:"dongmen", zh:"東門米粉攤", en:"Dongmen Market Rice Noodles", lat:24.8046, lng:120.9715},
-  {id:"xishi", zh:"西市米粉湯", en:"Xishi Rice Noodle Soup", lat:24.8042, lng:120.9689},
-  {id:"zhenji", zh:"珍記米粉湯", en:"Zhen-Ji Rice Noodle Soup", lat:24.8071, lng:120.9712}
+  {zh:"阿城米粉", en:"A-Cheng Rice Noodles", lat:24.8039, lng:120.9659},
+  {zh:"東門米粉攤", en:"Dongmen Market Rice Noodles", lat:24.8046, lng:120.9715},
+  {zh:"西市米粉湯", en:"Xishi Rice Noodle Soup", lat:24.8042, lng:120.9689},
+  {zh:"珍記米粉湯", en:"Zhen-Ji Rice Noodle Soup", lat:24.8071, lng:120.9712}
 ];
 
-/* ===== 地圖初始化 ===== */
 const map = L.map("map").setView([24.805,120.97],15);
 
 L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{
   maxZoom:19,
-  detectRetina:true,
   attribution:"© OpenStreetMap"
 }).addTo(map);
 
-/* ===== Marker ===== */
-const markers = [];
+let markers = [];
 
-function renderMarkers(){
+function render(){
   markers.forEach(m => map.removeLayer(m));
-  markers.length = 0;
+  markers = [];
+
+  document.getElementById("shopList").innerHTML = "";
 
   shops.forEach(s => {
-    const name = lang === "zh" ? s.zh : s.en;
-    const m = L.marker([s.lat, s.lng]).addTo(map);
+    const name = lang==="zh" ? s.zh : s.en;
 
-    m.bindPopup(`
-      <b>${name}</b><br>
-      <a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(name)}" target="_blank">
-        Google Maps
-      </a>
-    `);
-
-    m.on("click", () => {
-      map.flyTo([s.lat, s.lng], 17, {animate:true});
-      m.openPopup();
-    });
+    const m = L.marker([s.lat, s.lng]).addTo(map)
+      .bindPopup(`<b>${name}</b>`);
 
     markers.push(m);
+
+    document.getElementById("shopList").innerHTML +=
+      `<div class="item"><b>${name}</b></div>`;
   });
 }
 
-/* ===== 語言切換 ===== */
 function applyLang(){
   document.getElementById("title").textContent =
-    lang === "zh" ? "新竹米粉地圖" : "Hsinchu Rice Noodle Map";
-
+    lang==="zh"?"新竹米粉地圖":"Hsinchu Rice Noodle Map";
   document.getElementById("rateTitle").textContent =
-    lang === "zh" ? "🍜 店家列表" : "🍜 Shop List";
-
+    lang==="zh"?"🍜 店家列表":"🍜 Shop List";
   document.getElementById("formTitle").textContent =
-    lang === "zh" ? "📝 我要評分" : "📝 Rate a Shop";
-
+    lang==="zh"?"📝 我要評分":"📝 Rate a Shop";
   document.getElementById("langBtn").textContent =
-    lang === "zh" ? "EN" : "中文";
+    lang==="zh"?"EN":"中文";
 
-  renderMarkers();
-
-  /* 下方店家列表（無評分） */
-  document.getElementById("shopList").innerHTML =
-    shops.map(s => `
-      <div class="item">
-        <b>${lang === "zh" ? s.zh : s.en}</b>
-      </div>
-    `).join("");
+  render();
 }
 
 document.getElementById("langBtn").onclick = () => {
-  lang = lang === "zh" ? "en" : "zh";
+  lang = lang==="zh"?"en":"zh";
   applyLang();
 };
 
-/* ===== 啟動 ===== */
 applyLang();
-
 };
 </script>
+
+</body>
+</html>
