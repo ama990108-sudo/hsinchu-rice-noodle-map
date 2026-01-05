@@ -15,14 +15,11 @@ const shops = [
 /* ===== 地圖初始化 ===== */
 const map = L.map("map").setView([24.805,120.97],15);
 
-L.tileLayer(
-  "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
-  {
-    maxZoom:19,
-    detectRetina:true,
-    attribution:"© OpenStreetMap"
-  }
-).addTo(map);
+L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{
+  maxZoom:19,
+  detectRetina:true,
+  attribution:"© OpenStreetMap"
+}).addTo(map);
 
 /* ===== Marker ===== */
 const markers = [];
@@ -32,8 +29,8 @@ function renderMarkers(){
   markers.length = 0;
 
   shops.forEach(s => {
-    const m = L.marker([s.lat, s.lng]).addTo(map);
     const name = lang === "zh" ? s.zh : s.en;
+    const m = L.marker([s.lat, s.lng]).addTo(map);
 
     m.bindPopup(`
       <b>${name}</b><br>
@@ -51,43 +48,13 @@ function renderMarkers(){
   });
 }
 
-/* ===== 評分（Google Sheets CSV） ===== */
-function loadRatings(){
-  fetch("【貼你的 Google Sheets CSV 連結】")
-    .then(r => r.text())
-    .then(t => {
-      const rows = t.trim().split("\n").slice(1);
-      const stat = {};
-
-      rows.forEach(r => {
-        const [id, star] = r.split(",");
-        if(!stat[id]) stat[id] = {sum:0, count:0};
-        stat[id].sum += Number(star);
-        stat[id].count++;
-      });
-
-      document.getElementById("shopList").innerHTML =
-        shops.map(s => {
-          const d = stat[s.id];
-          const avg = d ? (d.sum / d.count).toFixed(1) : "—";
-          const cnt = d ? d.count : 0;
-          return `
-            <div class="item">
-              <b>${lang === "zh" ? s.zh : s.en}</b><br>
-              <span class="stars">⭐ ${avg}</span>（${cnt}）
-            </div>
-          `;
-        }).join("");
-    });
-}
-
 /* ===== 語言切換 ===== */
 function applyLang(){
   document.getElementById("title").textContent =
     lang === "zh" ? "新竹米粉地圖" : "Hsinchu Rice Noodle Map";
 
   document.getElementById("rateTitle").textContent =
-    lang === "zh" ? "🍜 店家評分" : "🍜 Ratings";
+    lang === "zh" ? "🍜 店家列表" : "🍜 Shop List";
 
   document.getElementById("formTitle").textContent =
     lang === "zh" ? "📝 我要評分" : "📝 Rate a Shop";
@@ -96,7 +63,14 @@ function applyLang(){
     lang === "zh" ? "EN" : "中文";
 
   renderMarkers();
-  loadRatings();
+
+  /* 下方列表（不含評分） */
+  document.getElementById("shopList").innerHTML =
+    shops.map(s => `
+      <div class="item">
+        <b>${lang === "zh" ? s.zh : s.en}</b>
+      </div>
+    `).join("");
 }
 
 document.getElementById("langBtn").onclick = () => {
