@@ -1,31 +1,31 @@
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <title>新竹米粉地圖 | Hsinchu Rice Noodle Map</title>
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
-  <style>
-    body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"PingFang TC","Noto Sans TC","Microsoft JhengHei",sans-serif;background:#faf7f2;color:#222}
-    header{background:#c62828;color:#fff;padding:14px 18px;display:flex;align-items:center;gap:12px}
-    header h1{margin:0;font-size:1.2rem}
-    header .spacer{flex:1}
-    header button{background:#fff;color:#c62828;border:none;border-radius:8px;padding:6px 10px;font-weight:700;cursor:pointer}
-    #map{height:62vh}
-    main{max-width:1000px;margin:auto;padding:14px}
-    .panel{background:#fff;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.06);padding:14px;margin-bottom:14px}
-    .list{display:grid;grid-template-columns:1fr;gap:10px}
-    @media(min-width:760px){.list{grid-template-columns:1fr 1fr}}
-    .item{border-left:6px solid #c62828;border-radius:10px;padding:10px}
-    .item h3{margin:0 0 6px}
-    .links a{margin-right:10px;color:#c62828;font-weight:700;text-decoration:none}
-    .stars span{font-size:1.3rem;cursor:pointer;color:#ccc}
-    .stars span.active{color:#f6b400}
-    textarea{width:100%;min-height:70px;border-radius:8px;border:1px solid #ddd;padding:8px}
-    footer{color:#666;font-size:.9rem;padding:10px 14px}
-  </style>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>新竹米粉地圖 | Hsinchu Rice Noodle Map</title>
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+
+<style>
+body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"PingFang TC","Noto Sans TC","Microsoft JhengHei",sans-serif;background:#faf7f2;color:#222}
+header{background:#c62828;color:#fff;padding:14px 18px;display:flex;align-items:center}
+header h1{margin:0;font-size:1.2rem}
+header .spacer{flex:1}
+header button{background:#fff;color:#c62828;border:none;border-radius:8px;padding:6px 10px;font-weight:700;cursor:pointer}
+#map{height:62vh}
+main{max-width:1000px;margin:auto;padding:14px}
+.panel{background:#fff;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.06);padding:14px;margin-bottom:14px}
+.list{display:grid;grid-template-columns:1fr;gap:10px}
+@media(min-width:760px){.list{grid-template-columns:1fr 1fr}}
+.item{border-left:6px solid #c62828;border-radius:10px;padding:10px}
+.stars{color:#f6b400;font-weight:700}
+.links a{color:#c62828;font-weight:700;text-decoration:none}
+</style>
 </head>
+
 <body>
+
 <header>
   <h1 id="title">新竹米粉地圖</h1>
   <div class="spacer"></div>
@@ -33,219 +33,67 @@
 </header>
 
 <div id="map"></div>
-<section id="ratings">
-  <h2>⭐ 米粉店評分｜Rice Noodle Ratings</h2>
 
-  <div class="shop-rating">
-    <h3>城隍廟 阿城米粉</h3>
-    <p>
-      平均評分：<span id="avg-acheng">載入中...</span> ⭐
-      （<span id="count-acheng">0</span> 人評分）
-    </p>
-    <a href="【貼你的Google表單連結】" target="_blank">
-      我要評分 / Rate this shop
-    </a>
-  </div>
-</section>
 <main>
-  <section class="panel">
-    <h2 id="routeTitle">📍 路線說明</h2>
-    <p id="routeDesc">以新竹火車站與城隍廟為核心，步行可達的經典米粉店。點擊地圖紅點可查看並前往 Google 地圖。</p>
-    <p class="links">
-      <a href="https://www.google.com/maps/search/?api=1&query=新竹火車站" target="_blank" rel="noopener">新竹火車站</a>
-      <a href="https://www.google.com/maps/search/?api=1&query=新竹城隍廟" target="_blank" rel="noopener">新竹城隍廟</a>
-    </p>
-  </section>
+<section class="panel">
+<h2>🍜 店家評分</h2>
+<div class="list" id="shopList"></div>
+</section>
 
-  <section class="panel">
-    <h2 id="listTitle">🍜 店家清單（可評分）</h2>
-    <div class="list" id="shopList"></div>
-  </section>
-
-  <section class="panel">
-    <h2 id="fbTitle">💬 意見回饋</h2>
-    <p id="fbDesc">此回饋僅儲存在你的瀏覽器（local）。</p>
-    <textarea id="feedback" placeholder="寫下你對這張地圖的建議…"></textarea>
-  </section>
+<section class="panel">
+<h2>📝 我要評分</h2>
+<a href="【在這裡貼你的 Google 表單連結】" target="_blank">
+👉 點我前往 Google 表單評分
+</a>
+</section>
 </main>
 
-<footer>
-  <p id="foot">提示：評分與回饋使用瀏覽器 localStorage，重新整理仍會保留。</p>
-</footer>
-
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
 <script>
-/* ===== 資料 ===== */
-const shops = [
-  {
-    id:"dongmen",
-    station:"Hsinchu",
-    zh:{name:"東門米粉攤",desc:"東門市場內，在地代表性米粉湯"},
-    en:{name:"Dongmen Market Rice Noodle Soup",desc:"Iconic local shop inside Dongmen Market"},
-    lat:24.8046, lng:120.9715,
-    g:"https://www.google.com/maps/search/?api=1&query=東門米粉攤 新竹"
-  },
-  {
-    id:"acheng",
-    station:"Hsinchu",
-    zh:{name:"阿城米粉",desc:"城隍廟周邊，湯頭清甜"},
-    en:{name:"A-Cheng Rice Noodles",desc:"Near Chenghuang Temple, light broth"},
-    lat:24.8039, lng:120.9659,
-    g:"https://www.google.com/maps/search/?api=1&query=阿城米粉 新竹"
-  },
-  {
-    id:"datong",
-    station:"North Hsinchu",
-    zh:{name:"大同米粉湯",desc:"北新竹老店，古早味"},
-    en:{name:"Datong Rice Noodle Soup",desc:"Old-style noodles"},
-    lat:24.8134, lng:120.9721,
-    g:"https://www.google.com/maps/search/?api=1&query=大同米粉湯 新竹"
-  },
-  {
-    id:"dingpu",
-    station:"Xiangshan",
-    zh:{name:"頂埔米粉湯",desc:"香山頂埔地區，在地傳統米粉湯"},
-    en:{name:"Dingpu Rice Noodle Soup",desc:"Traditional local noodles"},
-    lat:24.76091, lng:120.92934,
-    g:"https://www.google.com/maps/place/頂埔米粉湯"
-  },
-  {
-    id:"zhubei",
-    station:"Zhubei",
-    zh:{name:"竹北老店米粉湯",desc:"竹北車站步行可達"},
-    en:{name:"Old Zhubei Rice Noodle Soup",desc:"Near Zhubei Station"},
-    lat:24.8384, lng:121.0090,
-    g:"https://www.google.com/maps/search/?api=1&query=竹北米粉湯"
-  },
-  {
-    id:"xinfeng",
-    station:"Xinfeng",
-    zh:{name:"新豐老街米粉湯",desc:"新豐在地傳統口味"},
-    en:{name:"Xinfeng Old Street Rice Noodle Soup",desc:"Traditional noodles"},
-    lat:24.9042, lng:120.9984,
-    g:"https://www.google.com/maps/search/?api=1&query=新豐米粉湯"
-  }
+let lang="zh";
+
+const shops=[
+{id:"dongmen",zh:"東門米粉攤",en:"Dongmen Market Rice Noodle Soup",lat:24.8046,lng:120.9715,g:"https://www.google.com/maps/search/?api=1&query=東門米粉攤 新竹"},
+{id:"acheng",zh:"阿城米粉",en:"A-Cheng Rice Noodles",lat:24.8039,lng:120.9659,g:"https://www.google.com/maps/search/?api=1&query=阿城米粉 新竹"},
+{id:"datong",zh:"大同米粉湯",en:"Datong Rice Noodle Soup",lat:24.8134,lng:120.9721,g:"https://www.google.com/maps/search/?api=1&query=大同米粉湯 新竹"},
+{id:"dingpu",zh:"頂埔米粉湯",en:"Dingpu Rice Noodle Soup",lat:24.76091,lng:120.92934,g:"https://www.google.com/maps/place/頂埔米粉湯"}
 ];
 
-/* ===== 地圖初始化 ===== */
-let lang = "zh";
+const map=L.map("map").setView([24.8039,120.9698],14);
+L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:19}).addTo(map);
 
-const map = L.map("map").setView([24.8039,120.9698],15);
-L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{
-  maxZoom:19,
-  attribution:"© OpenStreetMap"
-}).addTo(map);
-
-const redIcon = new L.Icon({
-  iconUrl:"https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png",
-  shadowUrl:"https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png",
-  iconSize:[25,41],
-  iconAnchor:[12,41],
-  popupAnchor:[1,-34]
+shops.forEach(s=>{
+const m=L.marker([s.lat,s.lng]).addTo(map);
+m.bindPopup(`<b>${lang==="zh"?s.zh:s.en}</b><br><a href="${s.g}" target="_blank">Google Maps</a>`);
+m.on("click",()=>{m.openPopup();map.setView([s.lat,s.lng],17);});
 });
 
-const markers = {};
+/* ===== 從 Google Sheets 讀取平均 ===== */
+fetch("【在這裡貼 Google Sheets CSV 連結】")
+.then(r=>r.text())
+.then(t=>{
+const rows=t.trim().split("\n").slice(1);
+const stat={};
 
-/* ===== Marker ===== */
-function renderMarkers(){
-  Object.values(markers).forEach(m=>map.removeLayer(m));
-  Object.keys(markers).forEach(k=>delete markers[k]);
+rows.forEach(r=>{
+const [id,star]=r.split(",");
+if(!stat[id])stat[id]={sum:0,count:0};
+stat[id].sum+=Number(star);
+stat[id].count++;
+});
 
-  shops.forEach(s=>{
-    const m = L.marker([s.lat,s.lng],{icon:redIcon}).addTo(map);
-
-    m.on("click",()=>{
-      map.setView([s.lat,s.lng],17,{animate:true});
-      m.openPopup();
-    });
-
-    m.bindPopup(`
-      <b>${lang==="zh"?s.zh.name:s.en.name}</b><br>
-      ${lang==="zh"?s.zh.desc:s.en.desc}<br>
-      <a href="${s.g}" target="_blank">Google Maps</a>
-    `);
-
-    markers[s.id]=m;
-  });
-}
-
-/* ===== 列表與評分 ===== */
-function starUI(id){
-  const v = Number(localStorage.getItem("rate_"+id)||0);
-  let html='<div class="stars" data-id="'+id+'">';
-  for(let i=1;i<=5;i++){
-    html+=`<span class="${i<=v?'active':''}">★</span>`;
-  }
-  html+='</div>';
-  return html;
-}
-
-function renderList(){
-  const el = document.getElementById("shopList");
-
-  el.innerHTML = shops.map(s=>{
-    const r = getRating(s.id);
-    return `
-      <div class="item">
-        <h3>${lang==="zh"?s.zh.name:s.en.name}</h3>
-        <p>${lang==="zh"?s.zh.desc:s.en.desc}</p>
-
-        <p>
-          平均評分：<b>${r.avg}</b> ⭐
-          （${r.count} 人）
-        </p>
-
-        ${starUI(s.id)}
-
-        <div class="links">
-          <a href="${s.g}" target="_blank">Google Maps</a>
-        </div>
-      </div>
-    `;
-  }).join("");
-
-  document.querySelectorAll(".stars").forEach(st=>{
-    st.querySelectorAll("span").forEach((sp,i)=>{
-      sp.onclick = ()=>{
-        setRating(st.dataset.id, i+1);
-        renderList();
-      };
-    });
-  });
-}
-/* ===== 語言切換 ===== */
-function applyLang(){
-  document.getElementById("title").textContent=lang==="zh"?"新竹米粉地圖":"Hsinchu Rice Noodle Map";
-  document.getElementById("langBtn").textContent=lang==="zh"?"EN":"中文";
-  renderMarkers();
-  renderList();
-}
-
-document.getElementById("langBtn").onclick=()=>{
-  lang=lang==="zh"?"en":"zh";
-  applyLang();
-};
-
-/* ===== 回饋 ===== */
-const fb=document.getElementById("feedback");
-fb.value=localStorage.getItem("feedback")||"";
-fb.oninput=()=>localStorage.setItem("feedback",fb.value);
-
-/* ===== 啟動 ===== */
-applyLang();
+document.getElementById("shopList").innerHTML=shops.map(s=>{
+const d=stat[s.id];
+const avg=d?(d.sum/d.count).toFixed(1):"尚無";
+const cnt=d?d.count:0;
+return `<div class="item">
+<b>${lang==="zh"?s.zh:s.en}</b><br>
+<span class="stars">⭐ ${avg}</span>（${cnt} 人）
+</div>`;
+}).join("");
+});
 </script>
-<script>
-  .then(res => res.text())
-  .then(text => {
-    const rows = text.split("\n");
-    const avg = rows[1].split(",")[0];
-    const count = rows[1].split(",")[1];
 
-    document.getElementById("avg-acheng").innerText =
-      Number(avg).toFixed(1);
-
-    document.getElementById("count-acheng").innerText = count;
-  });
-</script>
 </body>
 </html>
