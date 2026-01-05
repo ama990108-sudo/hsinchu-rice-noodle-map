@@ -3,156 +3,57 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>新竹米粉地圖 | Hsinchu Rice Noodle Map</title>
+<title>新竹米粉地圖（測試）</title>
 
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<link
+  rel="stylesheet"
+  href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+/>
 
 <style>
-:root{
-  --red:#c62828;
-  --bg:#faf7f2;
-  --card:#ffffff;
-  --star:#f6b400;
-}
 body{
   margin:0;
-  font-family:-apple-system,BlinkMacSystemFont,"PingFang TC","Noto Sans TC","Microsoft JhengHei",sans-serif;
-  background:var(--bg);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang TC","Microsoft JhengHei",sans-serif;
 }
 header{
-  background:var(--red);
+  background:#c62828;
   color:#fff;
-  padding:14px 18px;
-  display:flex;
-  align-items:center;
+  padding:12px 16px;
 }
-header h1{margin:0;font-size:1.2rem}
-#map{height:60vh}
-
-main{
-  max-width:1100px;
-  margin:auto;
-  padding:16px;
+#map{
+  height:500px;   /* ← 關鍵：先用固定高度 */
+  width:100%;
 }
-.panel{
-  background:#fff;
-  border-radius:16px;
-  box-shadow:0 4px 12px rgba(0,0,0,.08);
-  padding:16px;
-  margin-bottom:16px;
-}
-.list{
-  display:grid;
-  grid-template-columns:1fr;
-  gap:12px;
-}
-@media(min-width:760px){
-  .list{grid-template-columns:1fr 1fr}
-}
-.item{
-  border-left:6px solid var(--red);
-  border-radius:12px;
-  padding:12px;
-}
-.stars{color:var(--star);font-weight:700}
-a{color:var(--red);font-weight:700;text-decoration:none}
-.footer{text-align:center;font-size:.85rem;color:#666;margin-bottom:20px}
 </style>
 </head>
 
 <body>
 
 <header>
-  <h1>新竹米粉地圖</h1>
+  <h1>新竹米粉地圖（測試版）</h1>
 </header>
 
 <div id="map"></div>
 
-<main>
-
-<section class="panel">
-<h2>🍜 米粉店評分（即時）</h2>
-<div class="list" id="shopList"></div>
-</section>
-
-<section class="panel">
-<h2>📝 我要評分</h2>
-<a href="【在這裡貼你的 Google 表單連結】" target="_blank">
-👉 點我填寫 Google 表單
-</a>
-</section>
-
-</main>
-
-<div class="footer">
-© Hsinchu Rice Noodle Map
-</div>
-
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 <script>
-/* ===== 店家資料 ===== */
-const shops=[
-{id:"dongmen",name:"東門米粉攤",lat:24.8046,lng:120.9715},
-{id:"acheng",name:"阿城米粉",lat:24.8039,lng:120.9659},
-{id:"datong",name:"大同米粉湯",lat:24.8134,lng:120.9721},
-{id:"linji",name:"林記米粉湯",lat:24.8139,lng:120.9866},
-{id:"xiangshan",name:"香山老店米粉湯",lat:24.7646,lng:120.9104},
-{id:"zhubei1",name:"正宗竹北米粉湯",lat:24.8388,lng:121.0094},
-{id:"zhubei2",name:"劉家米粉湯",lat:24.8374,lng:121.0112}
-];
+window.onload = function () {
 
-/* ===== 地圖 ===== */
-const map = L.map("map").setView([24.805,120.97],15);
+  const map = L.map("map").setView([24.805, 120.97], 15);
 
-L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{
-  maxZoom:19,
-  detectRetina:true
-}).addTo(map);
+  L.tileLayer(
+    "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+    {
+      maxZoom: 19,
+      attribution: "© OpenStreetMap"
+    }
+  ).addTo(map);
 
-/* ===== Marker ===== */
-shops.forEach(s=>{
-  const m=L.marker([s.lat,s.lng]).addTo(map);
+  const marker = L.marker([24.8039, 120.9659]).addTo(map);
+  marker.bindPopup("<b>阿城米粉</b>").openPopup();
 
-  m.bindPopup(`
-    <b>${s.name}</b><br>
-    <a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(s.name)}" target="_blank">
-      Google Maps
-    </a>
-  `);
-
-  m.on("click",()=>{
-    map.flyTo([s.lat,s.lng],17,{animate:true});
-    m.openPopup();
-  });
-});
-
-/* ===== 從 Google Sheets 讀取評分 ===== */
-fetch("【在這裡貼 Google Sheets 的 CSV 連結】")
-.then(r=>r.text())
-.then(text=>{
-  const rows=text.trim().split("\n").slice(1);
-  const stat={};
-
-  rows.forEach(r=>{
-    const [id,star]=r.split(",");
-    if(!stat[id])stat[id]={sum:0,count:0};
-    stat[id].sum+=Number(star);
-    stat[id].count++;
-  });
-
-  document.getElementById("shopList").innerHTML=shops.map(s=>{
-    const d=stat[s.id];
-    const avg=d?(d.sum/d.count).toFixed(1):"—";
-    const cnt=d?d.count:0;
-    return `
-      <div class="item">
-        <b>${s.name}</b><br>
-        <span class="stars">⭐ ${avg}</span>（${cnt} 人）
-      </div>
-    `;
-  }).join("");
-});
+};
 </script>
 
 </body>
