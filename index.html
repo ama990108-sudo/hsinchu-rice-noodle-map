@@ -106,12 +106,14 @@
 
   // ===== Xiangshan =====
   {
-    id:"xiangshan",
-    station:"Xiangshan",
-    zh:{name:"香山米粉湯",desc:"香山車站周邊老店"},
-    en:{name:"Xiangshan Rice Noodle Soup",desc:"Local favorite near Xiangshan Station"},
-    lat:24.7649, lng:120.9278,
-    g:"https://www.google.com/maps/search/?api=1&query=香山米粉湯"
+    {
+  id:"dingpu",
+  station:"Xiangshan",
+  zh:{name:"頂埔米粉湯",desc:"香山頂埔地區，在地傳統米粉湯"},
+  en:{name:"Dingpu Rice Noodle Soup",desc:"Traditional local noodles in Dingpu area"},
+  lat:24.76091, lng:120.92934,
+  g:"https://www.google.com/maps/place/頂埔米粉湯"
+}
   },
 
   // ===== Zhubei =====
@@ -147,7 +149,18 @@
     iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41]
   });
 
-  const markers = {};
+  const m = L.marker([s.lat, s.lng], { icon: redIcon }).addTo(map);
+
+m.on('click', () => {
+  map.setView([s.lat, s.lng], 17, { animate: true });
+  m.openPopup();
+});
+
+m.bindPopup(`
+  <b>${lang === 'zh' ? s.zh.name : s.en.name}</b><br/>
+  ${lang === 'zh' ? s.zh.desc : s.en.desc}<br/>
+  <a href="${s.g}" target="_blank">Google Maps</a>
+`);
   function renderMarkers(){
     Object.values(markers).forEach(m=>map.removeLayer(m));
     shops.forEach(s=>{
