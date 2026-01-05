@@ -75,8 +75,8 @@
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-  const shops = [
-  // ===== Hsinchu Station =====
+/* ===== 資料 ===== */
+const shops = [
   {
     id:"dongmen",
     station:"Hsinchu",
@@ -93,125 +93,134 @@
     lat:24.8039, lng:120.9659,
     g:"https://www.google.com/maps/search/?api=1&query=阿城米粉 新竹"
   },
-
-  // ===== North Hsinchu =====
   {
     id:"datong",
     station:"North Hsinchu",
     zh:{name:"大同米粉湯",desc:"北新竹老店，古早味"},
-    en:{name:"Datong Rice Noodle Soup",desc:"Old-style noodles near North Hsinchu Station"},
+    en:{name:"Datong Rice Noodle Soup",desc:"Old-style noodles"},
     lat:24.8134, lng:120.9721,
     g:"https://www.google.com/maps/search/?api=1&query=大同米粉湯 新竹"
   },
-
-  // ===== Xiangshan =====
   {
-  id:"dingpu",
-  station:"Xiangshan",
-  zh:{name:"頂埔米粉湯",desc:"香山頂埔地區，在地傳統米粉湯"},
-  en:{name:"Dingpu Rice Noodle Soup",desc:"Traditional local noodles in Dingpu area"},
-  lat:24.76091, lng:120.92934,
-  g:"https://www.google.com/maps/place/頂埔米粉湯"
+    id:"dingpu",
+    station:"Xiangshan",
+    zh:{name:"頂埔米粉湯",desc:"香山頂埔地區，在地傳統米粉湯"},
+    en:{name:"Dingpu Rice Noodle Soup",desc:"Traditional local noodles"},
+    lat:24.76091, lng:120.92934,
+    g:"https://www.google.com/maps/place/頂埔米粉湯"
   },
-
-  // ===== Zhubei =====
   {
-    id:"zhubei-old",
+    id:"zhubei",
     station:"Zhubei",
     zh:{name:"竹北老店米粉湯",desc:"竹北車站步行可達"},
-    en:{name:"Old Zhubei Rice Noodle Soup",desc:"Classic shop near Zhubei Station"},
+    en:{name:"Old Zhubei Rice Noodle Soup",desc:"Near Zhubei Station"},
     lat:24.8384, lng:121.0090,
     g:"https://www.google.com/maps/search/?api=1&query=竹北米粉湯"
   },
-
-  // ===== Xinfeng =====
   {
     id:"xinfeng",
     station:"Xinfeng",
     zh:{name:"新豐老街米粉湯",desc:"新豐在地傳統口味"},
-    en:{name:"Xinfeng Old Street Rice Noodle Soup",desc:"Traditional noodles near Xinfeng Station"},
+    en:{name:"Xinfeng Old Street Rice Noodle Soup",desc:"Traditional noodles"},
     lat:24.9042, lng:120.9984,
     g:"https://www.google.com/maps/search/?api=1&query=新豐米粉湯"
   }
 ];
 
-  let lang = "zh";
-  const map = L.map('map').setView([24.8039,120.9698], 15);
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    maxZoom: 19, attribution: '&copy; OpenStreetMap'
-  }).addTo(map);
+/* ===== 地圖初始化 ===== */
+let lang = "zh";
 
-  const redIcon = new L.Icon({
-    iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png',
-    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
-    iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41]
-  });
+const map = L.map("map").setView([24.8039,120.9698],15);
+L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{
+  maxZoom:19,
+  attribution:"© OpenStreetMap"
+}).addTo(map);
 
-  
+const redIcon = new L.Icon({
+  iconUrl:"https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png",
+  shadowUrl:"https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png",
+  iconSize:[25,41],
+  iconAnchor:[12,41],
+  popupAnchor:[1,-34]
+});
 
+const markers = {};
 
-  const markers = {};
-
+/* ===== Marker ===== */
 function renderMarkers(){
-  Object.values(markers).forEach(m => map.removeLayer(m));
+  Object.values(markers).forEach(m=>map.removeLayer(m));
+  Object.keys(markers).forEach(k=>delete markers[k]);
 
-  shops.forEach(s => {
-    markers[s.id] = m;
+  shops.forEach(s=>{
+    const m = L.marker([s.lat,s.lng],{icon:redIcon}).addTo(map);
+
+    m.on("click",()=>{
+      map.setView([s.lat,s.lng],17,{animate:true});
+      m.openPopup();
+    });
+
+    m.bindPopup(`
+      <b>${lang==="zh"?s.zh.name:s.en.name}</b><br>
+      ${lang==="zh"?s.zh.desc:s.en.desc}<br>
+      <a href="${s.g}" target="_blank">Google Maps</a>
+    `);
+
+    markers[s.id]=m;
   });
 }
 
-  function starUI(id){
-    const val = Number(localStorage.getItem('rate_'+id)||0);
-    let html = '<div class="stars" data-id="'+id+'">';
-    for(let i=1;i<=5;i++){
-      html += '<span class="'+(i<=val?'active':'')+'">★</span>';
-    }
-    html += '</div>';
-    return html;
+/* ===== 列表與評分 ===== */
+function starUI(id){
+  const v = Number(localStorage.getItem("rate_"+id)||0);
+  let html='<div class="stars" data-id="'+id+'">';
+  for(let i=1;i<=5;i++){
+    html+=`<span class="${i<=v?'active':''}">★</span>`;
   }
+  html+='</div>';
+  return html;
+}
 
-  function renderList(){
-    const el = document.getElementById('shopList');
-    el.innerHTML = shops.map(s=>`
-      <div class="item">
-        <h3>${lang==='zh'?s.zh.name:s.en.name}</h3>
-        <p>${lang==='zh'?s.zh.desc:s.en.desc}</p>
-        ${starUI(s.id)}
-        <div class="links"><a href="${s.g}" target="_blank">Google Maps</a></div>
-      </div>
-    `).join('');
-    document.querySelectorAll('.stars').forEach(st=>{
-      st.querySelectorAll('span').forEach((sp,i)=>{
-        sp.onclick=()=>{
-          localStorage.setItem('rate_'+st.dataset.id, i+1);
-          renderList();
-        }
-      })
-    })
-  }
+function renderList(){
+  const el=document.getElementById("shopList");
+  el.innerHTML=shops.map(s=>`
+    <div class="item">
+      <h3>${lang==="zh"?s.zh.name:s.en.name}</h3>
+      <p>${lang==="zh"?s.zh.desc:s.en.desc}</p>
+      ${starUI(s.id)}
+      <div class="links"><a href="${s.g}" target="_blank">Google Maps</a></div>
+    </div>
+  `).join("");
 
-  function applyLang(){
-    document.getElementById('title').textContent = lang==='zh'?'新竹米粉地圖':'Hsinchu Rice Noodle Map';
-    document.getElementById('routeTitle').textContent = lang==='zh'?'📍 路線說明':'📍 Route';
-    document.getElementById('routeDesc').textContent = lang==='zh'
-      ?'以新竹火車站與城隍廟為核心，步行可達的經典米粉店。點擊地圖紅點可查看並前往 Google 地圖。'
-      :'Walkable classic rice noodle shops around Hsinchu Train Station and Chenghuang Temple. Click red markers for Google Maps.';
-    document.getElementById('listTitle').textContent = lang==='zh'?'🍜 店家清單（可評分）':'🍜 Shop List (Rate it)';
-    document.getElementById('fbTitle').textContent = lang==='zh'?'💬 意見回饋':'💬 Feedback';
-    document.getElementById('fbDesc').textContent = lang==='zh'?'此回饋僅儲存在你的瀏覽器（local）。':'Feedback is stored locally in your browser.';
-    document.getElementById('foot').textContent = lang==='zh'
-      ?'提示：評分與回饋使用瀏覽器 localStorage，重新整理仍會保留。'
-      :'Tip: Ratings and feedback are saved locally via localStorage.';
-    document.getElementById('langBtn').textContent = lang==='zh'?'EN':'中文';
-    renderMarkers(); renderList();
-  }
+  document.querySelectorAll(".stars").forEach(st=>{
+    st.querySelectorAll("span").forEach((sp,i)=>{
+      sp.onclick=()=>{
+        localStorage.setItem("rate_"+st.dataset.id,i+1);
+        renderList();
+      };
+    });
+  });
+}
 
-  document.getElementById('langBtn').onclick=()=>{ lang = (lang==='zh'?'en':'zh'); applyLang(); };
-  const fb = document.getElementById('feedback');
-  fb.value = localStorage.getItem('feedback')||'';
-  fb.oninput=()=>localStorage.setItem('feedback', fb.value);
+/* ===== 語言切換 ===== */
+function applyLang(){
+  document.getElementById("title").textContent=lang==="zh"?"新竹米粉地圖":"Hsinchu Rice Noodle Map";
+  document.getElementById("langBtn").textContent=lang==="zh"?"EN":"中文";
+  renderMarkers();
+  renderList();
+}
 
+document.getElementById("langBtn").onclick=()=>{
+  lang=lang==="zh"?"en":"zh";
   applyLang();
+};
+
+/* ===== 回饋 ===== */
+const fb=document.getElementById("feedback");
+fb.value=localStorage.getItem("feedback")||"";
+fb.oninput=()=>localStorage.setItem("feedback",fb.value);
+
+/* ===== 啟動 ===== */
+applyLang();
 </script>
 <script>
 fetch("【貼你的Google Sheets CSV 連結】")
