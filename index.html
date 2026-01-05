@@ -34,12 +34,11 @@
 
 <div id="map"></div>
 <section id="ratings">
-  <h2>⭐ 米粉店評分｜Rice Noodle Ratings</h2>
 
   <div class="shop-rating">
     <h3>城隍廟 阿城米粉</h3>
     <a href="【https://docs.google.com/forms/d/e/1FAIpQLSc30CvEspcBPhKd2W_ylALFxNIFLKsiv2afyXhGM674qEzFVQ/viewform】" target="_blank">
-      我要評分 / Rate this shop
+      點我幫作者做消費者分析/Click me to help the author finshed her customer analyzing report
     </a>
   </div>
 </section>
@@ -54,20 +53,11 @@
   </section>
 
   <section class="panel">
-    <h2 id="listTitle">🍜 店家清單（可評分）</h2>
+    <h2 id="listTitle">🍜 店家清單</h2>
     <div class="list" id="shopList"></div>
   </section>
 
-  <section class="panel">
-    <h2 id="fbTitle">💬 意見回饋</h2>
-    <p id="fbDesc">此回饋僅儲存在你的瀏覽器（local）。</p>
-    <textarea id="feedback" placeholder="寫下你對這張地圖的建議…"></textarea>
-  </section>
 </main>
-
-<footer>
-  <p id="foot">提示：評分與回饋使用瀏覽器 localStorage，重新整理仍會保留。</p>
-</footer>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
@@ -88,10 +78,10 @@
     },
     {
       id:"temple",
-      zh:{name:"城隍廟口米粉",desc:"廟口小吃聚集地"},
-      en:{name:"Chenghuang Temple Rice Noodles",desc:"Temple-front street food area"},
+      zh:{name:"西市米粉湯",desc:"來新竹必吃"},
+      en:{name:"Xishi Rice Noodle Soup",desc:"A must-try food in Hsinchu"},
       lat:24.8043, lng:120.9666,
-      g:"https://www.google.com/maps/search/?api=1&query=城隍廟口 米粉 新竹"
+      g:"https://maps.app.goo.gl/2xov6MXd7FrEr2476?g_st=ipc"
     },
     {
       id:"zhenji",
@@ -100,20 +90,7 @@
       lat:24.8019, lng:120.9719,
       g:"https://www.google.com/maps/search/?api=1&query=珍記米粉湯 新竹"
     },
-    {
-      id:"central",
-      zh:{name:"中央市場米粉攤",desc:"市場系風味，早午餐熱鬧"},
-      en:{name:"Central Market Rice Noodles",desc:"Market-style noodles, busy mornings"},
-      lat:24.8032, lng:120.9736,
-      g:"https://www.google.com/maps/search/?api=1&query=中央市場 米粉 新竹"
-    },
-    {
-      id:"old",
-      zh:{name:"老新竹米粉（城隍廟周邊）",desc:"傳統作法，清爽耐吃"},
-      en:{name:"Old Hsinchu Rice Noodles",desc:"Traditional style near the temple"},
-      lat:24.8035, lng:120.9660,
-      g:"https://www.google.com/maps/search/?api=1&query=老新竹 米粉 城隍廟"
-    }
+    
   ];
 
   let lang = "zh";
