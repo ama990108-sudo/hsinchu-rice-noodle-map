@@ -63,7 +63,9 @@
   </section>
 
   <section class="panel">
-   
+    <h2 id="fbTitle">💬 意見回饋</h2>
+    <p id="fbDesc">此回饋僅儲存在你的瀏覽器（local）。</p>
+    <textarea id="feedback" placeholder="寫下你對這張地圖的建議…"></textarea>
   </section>
 </main>
 
@@ -196,6 +198,7 @@
   applyLang();
 </script>
 <script>
+fetch("【貼你的Google Sheets CSV 連結】")
   .then(res => res.text())
   .then(text => {
     const rows = text.split("\n");
@@ -210,3 +213,4 @@
 </script>
 </body>
 </html>
+現在長這樣
