@@ -33,11 +33,17 @@
 </header>
 
 <div id="map"></div>
+<section id="ratings">
+  <h2>⭐ 米粉店評分｜Rice Noodle Ratings</h2>
+
+  <div class="shop-rating">
     <h3>城隍廟 阿城米粉</h3>
     <p>
+      平均評分：<span id="avg-acheng">載入中...</span> ⭐
+      （<span id="count-acheng">0</span> 人評分）
     </p>
-    <a href="【https://docs.google.com/forms/d/e/1FAIpQLSc30CvEspcBPhKd2W_ylALFxNIFLKsiv2afyXhGM674qEzFVQ/viewform】" target="_blank">
-      我要評分、留下意見 / Rate this shop or leave a comment
+    <a href="【貼你的Google表單連結】" target="_blank">
+      我要評分 / Rate this shop
     </a>
   </div>
 </section>
@@ -52,15 +58,19 @@
   </section>
 
   <section class="panel">
-    <h2 id="listTitle">🍜 店家清單</h2>
+    <h2 id="listTitle">🍜 店家清單（可評分）</h2>
     <div class="list" id="shopList"></div>
   </section>
 
   <section class="panel">
+    <h2 id="fbTitle">💬 意見回饋</h2>
+    <p id="fbDesc">此回饋僅儲存在你的瀏覽器（local）。</p>
+    <textarea id="feedback" placeholder="寫下你對這張地圖的建議…"></textarea>
   </section>
 </main>
 
 <footer>
+  <p id="foot">提示：評分與回饋使用瀏覽器 localStorage，重新整理仍會保留。</p>
 </footer>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -81,6 +91,13 @@
       g:"https://www.google.com/maps/search/?api=1&query=阿城米粉 新竹"
     },
     {
+      id:"temple",
+      zh:{name:"城隍廟口米粉",desc:"廟口小吃聚集地"},
+      en:{name:"Chenghuang Temple Rice Noodles",desc:"Temple-front street food area"},
+      lat:24.8043, lng:120.9666,
+      g:"https://www.google.com/maps/search/?api=1&query=城隍廟口 米粉 新竹"
+    },
+    {
       id:"zhenji",
       zh:{name:"珍記米粉湯",desc:"火車站周邊老字號"},
       en:{name:"Zhen Ji Rice Noodle Soup",desc:"Classic shop near the train station"},
@@ -89,12 +106,18 @@
     },
     {
       id:"central",
-      zh:{name:"西市米粉湯",desc:"市場系風味，早午餐熱鬧"},
-      en:{name:"Xishi Rice Noodles",desc:"Market-style noodles, busy mornings"},
+      zh:{name:"中央市場米粉攤",desc:"市場系風味，早午餐熱鬧"},
+      en:{name:"Central Market Rice Noodles",desc:"Market-style noodles, busy mornings"},
       lat:24.8032, lng:120.9736,
-      g:"https://maps.app.goo.gl/2xov6MXd7FrEr2476?g_st=ipc"
+      g:"https://www.google.com/maps/search/?api=1&query=中央市場 米粉 新竹"
     },
-  
+    {
+      id:"old",
+      zh:{name:"老新竹米粉（城隍廟周邊）",desc:"傳統作法，清爽耐吃"},
+      en:{name:"Old Hsinchu Rice Noodles",desc:"Traditional style near the temple"},
+      lat:24.8035, lng:120.9660,
+      g:"https://www.google.com/maps/search/?api=1&query=老新竹 米粉 城隍廟"
+    }
   ];
 
   let lang = "zh";
@@ -157,10 +180,11 @@
     document.getElementById('routeDesc').textContent = lang==='zh'
       ?'以新竹火車站與城隍廟為核心，步行可達的經典米粉店。點擊地圖紅點可查看並前往 Google 地圖。'
       :'Walkable classic rice noodle shops around Hsinchu Train Station and Chenghuang Temple. Click red markers for Google Maps.';
-    document.getElementById('listTitle').textContent = lang==='zh'?'🍜 店家清單':'🍜 Shop List ';
-    document.getElementById('fbTitle').textContent = lang==='zh'?'
-    document.getElementById('fbDesc').textContent = lang==='zh'?'
+    document.getElementById('listTitle').textContent = lang==='zh'?'🍜 店家清單（可評分）':'🍜 Shop List (Rate it)';
+    document.getElementById('fbTitle').textContent = lang==='zh'?'💬 意見回饋':'💬 Feedback';
+    document.getElementById('fbDesc').textContent = lang==='zh'?'此回饋僅儲存在你的瀏覽器（local）。':'Feedback is stored locally in your browser.';
     document.getElementById('foot').textContent = lang==='zh'
+      ?'提示：評分與回饋使用瀏覽器 localStorage，重新整理仍會保留。'
       :'Tip: Ratings and feedback are saved locally via localStorage.';
     document.getElementById('langBtn').textContent = lang==='zh'?'EN':'中文';
     renderMarkers(); renderList();
@@ -174,6 +198,7 @@
   applyLang();
 </script>
 <script>
+fetch("【貼你的Google Sheets CSV 連結】")
   .then(res => res.text())
   .then(text => {
     const rows = text.split("\n");
@@ -188,4 +213,3 @@
 </script>
 </body>
 </html>
-現在長這樣
