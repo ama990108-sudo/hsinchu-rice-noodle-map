@@ -1,127 +1,15 @@
-<!DOCTYPE html>
-<html lang="zh-Hant">
-<head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>新竹米粉地圖 | Hsinchu Rice Noodle Map</title>
-
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
-
-<style>
-:root{
-  --red:#c62828;
-  --bg:#faf7f2;
-  --card:#ffffff;
-  --star:#f6b400;
-}
-body{
-  margin:0;
-  font-family:-apple-system,BlinkMacSystemFont,"PingFang TC","Noto Sans TC","Microsoft JhengHei",sans-serif;
-  background:var(--bg);
-}
-header{
-  background:var(--red);
-  color:#fff;
-  padding:12px 16px;
-  display:flex;
-  align-items:center;
-}
-header h1{margin:0;font-size:1.2rem}
-header .spacer{flex:1}
-header button{
-  background:#fff;
-  color:var(--red);
-  border:none;
-  border-radius:20px;
-  padding:6px 14px;
-  font-weight:700;
-  cursor:pointer;
-}
-#map{
-  height:520px; /* 固定高度最穩 */
-  width:100%;
-}
-main{
-  max-width:1100px;
-  margin:auto;
-  padding:16px;
-}
-.panel{
-  background:var(--card);
-  border-radius:16px;
-  box-shadow:0 4px 12px rgba(0,0,0,.08);
-  padding:16px;
-  margin-bottom:16px;
-}
-.list{
-  display:grid;
-  grid-template-columns:1fr;
-  gap:12px;
-}
-@media(min-width:760px){
-  .list{grid-template-columns:1fr 1fr}
-}
-.item{
-  border-left:6px solid var(--red);
-  border-radius:12px;
-  padding:12px;
-}
-.stars{color:var(--star);font-weight:700}
-.footer{
-  text-align:center;
-  font-size:.85rem;
-  color:#666;
-  margin:20px 0;
-}
-</style>
-</head>
-
-<body>
-
-<header>
-  <h1 id="title">新竹米粉地圖</h1>
-  <div class="spacer"></div>
-  <button id="langBtn">EN</button>
-</header>
-
-<div id="map"></div>
-
-<main>
-
-<section class="panel">
-  <h2 id="rateTitle">🍜 店家評分</h2>
-  <div class="list" id="shopList"></div>
-</section>
-
-<section class="panel">
-  <h2 id="formTitle">📝 我要評分</h2>
-  <a id="formLink" href="【貼你的 Google 表單連結】" target="_blank">
-    👉 前往 Google 表單填寫評分
-  </a>
-</section>
-
-</main>
-
-<div class="footer">
-© Hsinchu Rice Noodle Map
-</div>
-
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
 <script>
 window.onload = function(){
 
 /* ===== 語言 ===== */
 let lang = "zh";
 
-/* ===== 店家資料（可繼續加） ===== */
+/* ===== 店家資料 ===== */
 const shops = [
   {id:"acheng", zh:"阿城米粉", en:"A-Cheng Rice Noodles", lat:24.8039, lng:120.9659},
   {id:"dongmen", zh:"東門米粉攤", en:"Dongmen Market Rice Noodles", lat:24.8046, lng:120.9715},
-  {id:"datong", zh:"大同米粉湯", en:"Datong Rice Noodle Soup", lat:24.8134, lng:120.9721},
-  {id:"linji", zh:"林記米粉湯", en:"Lin's Rice Noodles", lat:24.8139, lng:120.9866},
-  {id:"xiangshan", zh:"香山老店米粉湯", en:"Xiangshan Old Rice Noodles", lat:24.7646, lng:120.9104},
-  {id:"zhubei", zh:"正宗竹北米粉湯", en:"Zhubei Classic Rice Noodles", lat:24.8388, lng:121.0094}
+  {id:"xishi", zh:"西市米粉湯", en:"Xishi Rice Noodle Soup", lat:24.8042, lng:120.9689},
+  {id:"zhenji", zh:"珍記米粉湯", en:"Zhen-Ji Rice Noodle Soup", lat:24.8071, lng:120.9712}
 ];
 
 /* ===== 地圖初始化 ===== */
@@ -140,13 +28,12 @@ L.tileLayer(
 const markers = [];
 
 function renderMarkers(){
-  markers.forEach(m=>map.removeLayer(m));
+  markers.forEach(m => map.removeLayer(m));
   markers.length = 0;
 
-  shops.forEach(s=>{
+  shops.forEach(s => {
     const m = L.marker([s.lat, s.lng]).addTo(map);
-
-    const name = lang==="zh"?s.zh:s.en;
+    const name = lang === "zh" ? s.zh : s.en;
 
     m.bindPopup(`
       <b>${name}</b><br>
@@ -155,8 +42,8 @@ function renderMarkers(){
       </a>
     `);
 
-    m.on("click", ()=>{
-      map.flyTo([s.lat,s.lng],17,{animate:true});
+    m.on("click", () => {
+      map.flyTo([s.lat, s.lng], 17, {animate:true});
       m.openPopup();
     });
 
@@ -166,51 +53,54 @@ function renderMarkers(){
 
 /* ===== 評分（Google Sheets CSV） ===== */
 function loadRatings(){
-fetch("【貼你的 Google Sheets CSV 連結】")
-.then(r=>r.text())
-.then(t=>{
-  const rows = t.trim().split("\n").slice(1);
-  const stat = {};
+  fetch("【貼你的 Google Sheets CSV 連結】")
+    .then(r => r.text())
+    .then(t => {
+      const rows = t.trim().split("\n").slice(1);
+      const stat = {};
 
-  rows.forEach(r=>{
-    const [id,star] = r.split(",");
-    if(!stat[id]) stat[id]={sum:0,count:0};
-    stat[id].sum += Number(star);
-    stat[id].count++;
-  });
+      rows.forEach(r => {
+        const [id, star] = r.split(",");
+        if(!stat[id]) stat[id] = {sum:0, count:0};
+        stat[id].sum += Number(star);
+        stat[id].count++;
+      });
 
-  document.getElementById("shopList").innerHTML =
-    shops.map(s=>{
-      const d = stat[s.id];
-      const avg = d?(d.sum/d.count).toFixed(1):"—";
-      const cnt = d?d.count:0;
-      return `
-        <div class="item">
-          <b>${lang==="zh"?s.zh:s.en}</b><br>
-          <span class="stars">⭐ ${avg}</span>（${cnt}）
-        </div>
-      `;
-    }).join("");
-});
+      document.getElementById("shopList").innerHTML =
+        shops.map(s => {
+          const d = stat[s.id];
+          const avg = d ? (d.sum / d.count).toFixed(1) : "—";
+          const cnt = d ? d.count : 0;
+          return `
+            <div class="item">
+              <b>${lang === "zh" ? s.zh : s.en}</b><br>
+              <span class="stars">⭐ ${avg}</span>（${cnt}）
+            </div>
+          `;
+        }).join("");
+    });
 }
 
 /* ===== 語言切換 ===== */
 function applyLang(){
   document.getElementById("title").textContent =
-    lang==="zh"?"新竹米粉地圖":"Hsinchu Rice Noodle Map";
+    lang === "zh" ? "新竹米粉地圖" : "Hsinchu Rice Noodle Map";
+
   document.getElementById("rateTitle").textContent =
-    lang==="zh"?"🍜 店家評分":"🍜 Ratings";
+    lang === "zh" ? "🍜 店家評分" : "🍜 Ratings";
+
   document.getElementById("formTitle").textContent =
-    lang==="zh"?"📝 我要評分":"📝 Rate a Shop";
+    lang === "zh" ? "📝 我要評分" : "📝 Rate a Shop";
+
   document.getElementById("langBtn").textContent =
-    lang==="zh"?"EN":"中文";
+    lang === "zh" ? "EN" : "中文";
 
   renderMarkers();
   loadRatings();
 }
 
-document.getElementById("langBtn").onclick = ()=>{
-  lang = lang==="zh"?"en":"zh";
+document.getElementById("langBtn").onclick = () => {
+  lang = lang === "zh" ? "en" : "zh";
   applyLang();
 };
 
@@ -219,6 +109,3 @@ applyLang();
 
 };
 </script>
-
-</body>
-</html>
