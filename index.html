@@ -76,49 +76,64 @@
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
   const shops = [
-    {
-      id:"dongmen",
-      zh:{name:"東門米粉攤（東門市場）",desc:"在地人氣、芋頭米粉湯代表"},
-      en:{name:"Dongmen Rice Noodles (Dongmen Market)",desc:"Local favorite with taro rice noodle soup"},
-      lat:24.8046, lng:120.9715,
-      g:"https://www.google.com/maps/search/?api=1&query=東門米粉攤 新竹"
-    },
-    {
-      id:"acheng",
-      zh:{name:"阿城米粉",desc:"靠近城隍廟，湯頭清甜"},
-      en:{name:"A-Cheng Rice Noodles",desc:"Near Chenghuang Temple; light, sweet broth"},
-      lat:24.8039, lng:120.9659,
-      g:"https://www.google.com/maps/search/?api=1&query=阿城米粉 新竹"
-    },
-    {
-      id:"temple",
-      zh:{name:"城隍廟口米粉",desc:"廟口小吃聚集地"},
-      en:{name:"Chenghuang Temple Rice Noodles",desc:"Temple-front street food area"},
-      lat:24.8043, lng:120.9666,
-      g:"https://www.google.com/maps/search/?api=1&query=城隍廟口 米粉 新竹"
-    },
-    {
-      id:"zhenji",
-      zh:{name:"珍記米粉湯",desc:"火車站周邊老字號"},
-      en:{name:"Zhen Ji Rice Noodle Soup",desc:"Classic shop near the train station"},
-      lat:24.8019, lng:120.9719,
-      g:"https://www.google.com/maps/search/?api=1&query=珍記米粉湯 新竹"
-    },
-    {
-      id:"central",
-      zh:{name:"中央市場米粉攤",desc:"市場系風味，早午餐熱鬧"},
-      en:{name:"Central Market Rice Noodles",desc:"Market-style noodles, busy mornings"},
-      lat:24.8032, lng:120.9736,
-      g:"https://www.google.com/maps/search/?api=1&query=中央市場 米粉 新竹"
-    },
-    {
-      id:"old",
-      zh:{name:"老新竹米粉（城隍廟周邊）",desc:"傳統作法，清爽耐吃"},
-      en:{name:"Old Hsinchu Rice Noodles",desc:"Traditional style near the temple"},
-      lat:24.8035, lng:120.9660,
-      g:"https://www.google.com/maps/search/?api=1&query=老新竹 米粉 城隍廟"
-    }
-  ];
+  // ===== Hsinchu Station =====
+  {
+    id:"dongmen",
+    station:"Hsinchu",
+    zh:{name:"東門米粉攤",desc:"東門市場內，在地代表性米粉湯"},
+    en:{name:"Dongmen Market Rice Noodle Soup",desc:"Iconic local shop inside Dongmen Market"},
+    lat:24.8046, lng:120.9715,
+    g:"https://www.google.com/maps/search/?api=1&query=東門米粉攤 新竹"
+  },
+  {
+    id:"acheng",
+    station:"Hsinchu",
+    zh:{name:"阿城米粉",desc:"城隍廟周邊，湯頭清甜"},
+    en:{name:"A-Cheng Rice Noodles",desc:"Near Chenghuang Temple, light broth"},
+    lat:24.8039, lng:120.9659,
+    g:"https://www.google.com/maps/search/?api=1&query=阿城米粉 新竹"
+  },
+
+  // ===== North Hsinchu =====
+  {
+    id:"datong",
+    station:"North Hsinchu",
+    zh:{name:"大同米粉湯",desc:"北新竹老店，古早味"},
+    en:{name:"Datong Rice Noodle Soup",desc:"Old-style noodles near North Hsinchu Station"},
+    lat:24.8134, lng:120.9721,
+    g:"https://www.google.com/maps/search/?api=1&query=大同米粉湯 新竹"
+  },
+
+  // ===== Xiangshan =====
+  {
+    id:"xiangshan",
+    station:"Xiangshan",
+    zh:{name:"香山米粉湯",desc:"香山車站周邊老店"},
+    en:{name:"Xiangshan Rice Noodle Soup",desc:"Local favorite near Xiangshan Station"},
+    lat:24.7649, lng:120.9278,
+    g:"https://www.google.com/maps/search/?api=1&query=香山米粉湯"
+  },
+
+  // ===== Zhubei =====
+  {
+    id:"zhubei-old",
+    station:"Zhubei",
+    zh:{name:"竹北老店米粉湯",desc:"竹北車站步行可達"},
+    en:{name:"Old Zhubei Rice Noodle Soup",desc:"Classic shop near Zhubei Station"},
+    lat:24.8384, lng:121.0090,
+    g:"https://www.google.com/maps/search/?api=1&query=竹北米粉湯"
+  },
+
+  // ===== Xinfeng =====
+  {
+    id:"xinfeng",
+    station:"Xinfeng",
+    zh:{name:"新豐老街米粉湯",desc:"新豐在地傳統口味"},
+    en:{name:"Xinfeng Old Street Rice Noodle Soup",desc:"Traditional noodles near Xinfeng Station"},
+    lat:24.9042, lng:120.9984,
+    g:"https://www.google.com/maps/search/?api=1&query=新豐米粉湯"
+  }
+];
 
   let lang = "zh";
   const map = L.map('map').setView([24.8039,120.9698], 15);
