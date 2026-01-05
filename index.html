@@ -160,16 +160,7 @@ m.bindPopup(`
   <a href="${s.g}" target="_blank">Google Maps</a>
 `);
 
-m.on('click', () => {
-  map.setView([s.lat, s.lng], 17, { animate: true });
-  m.openPopup();
-});
 
-m.bindPopup(`
-  <b>${lang === 'zh' ? s.zh.name : s.en.name}</b><br/>
-  ${lang === 'zh' ? s.zh.desc : s.en.desc}<br/>
-  <a href="${s.g}" target="_blank">Google Maps</a>
-`);
   const markers = {};
 
 function renderMarkers(){
