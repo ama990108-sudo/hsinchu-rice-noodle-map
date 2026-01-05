@@ -8,110 +8,174 @@
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 
 <style>
-body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"PingFang TC","Noto Sans TC","Microsoft JhengHei",sans-serif;background:#faf7f2;color:#222}
-header{background:#c62828;color:#fff;padding:14px 18px;display:flex;align-items:center}
+:root{
+  --red:#c62828;
+  --bg:#faf7f2;
+  --card:#ffffff;
+  --star:#f6b400;
+}
+body{
+  margin:0;
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang TC","Noto Sans TC","Microsoft JhengHei",sans-serif;
+  background:var(--bg);
+  color:#222;
+}
+header{
+  background:var(--red);
+  color:#fff;
+  padding:14px 18px;
+  display:flex;
+  align-items:center;
+}
 header h1{margin:0;font-size:1.2rem}
 header .spacer{flex:1}
-header button{background:#fff;color:#c62828;border:none;border-radius:8px;padding:6px 10px;font-weight:700;cursor:pointer}
-#map{height:62vh}
-.panel{background:#fff;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.06);padding:14px;margin:14px}
-.star span{cursor:pointer;font-size:1.2rem;color:#ccc}
-.star span.active{color:#f6b400}
+header button{
+  background:#fff;
+  color:var(--red);
+  border:none;
+  border-radius:20px;
+  padding:6px 14px;
+  font-weight:700;
+  cursor:pointer;
+}
+#map{height:60vh}
+
+main{
+  max-width:1100px;
+  margin:auto;
+  padding:16px;
+}
+.panel{
+  background:var(--card);
+  border-radius:16px;
+  box-shadow:0 4px 12px rgba(0,0,0,.08);
+  padding:16px;
+  margin-bottom:16px;
+}
+.panel h2{margin-top:0}
+.list{
+  display:grid;
+  grid-template-columns:1fr;
+  gap:12px;
+}
+@media(min-width:760px){
+  .list{grid-template-columns:1fr 1fr}
+}
+.item{
+  border-left:6px solid var(--red);
+  border-radius:12px;
+  padding:12px;
+}
+.stars{color:var(--star);font-weight:700;font-size:1.05rem}
+.links a{
+  color:var(--red);
+  font-weight:700;
+  text-decoration:none;
+}
+.footer{
+  text-align:center;
+  font-size:.85rem;
+  color:#666;
+  margin-bottom:20px;
+}
 </style>
 </head>
 
 <body>
 
 <header>
-<h1>新竹米粉地圖</h1>
-<div class="spacer"></div>
+  <h1 id="title">新竹米粉地圖</h1>
+  <div class="spacer"></div>
+  <button id="langBtn">EN</button>
 </header>
 
 <div id="map"></div>
 
-<div class="panel">
-<h3>📝 我要評分</h3>
-<a href="【在這裡貼你的 Google 表單連結】" target="_blank">
-👉 點我填寫 Google 表單（影響公開平均）
+<main>
+
+<section class="panel">
+<h2 id="rateTitle">🍜 店家評分</h2>
+<div class="list" id="shopList"></div>
+</section>
+
+<section class="panel">
+<h2 id="formTitle">📝 我要評分</h2>
+<a id="formLink" href="【你的 Google 表單連結】" target="_blank">
+👉 前往 Google 表單填寫評分
 </a>
+</section>
+
+</main>
+
+<div class="footer">
+© Hsinchu Rice Noodle Map｜資料持續更新中
 </div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 <script>
+let lang="zh";
+
 const shops=[
-{id:"dongmen",name:"東門米粉攤",lat:24.8046,lng:120.9715,g:"https://www.google.com/maps/search/?api=1&query=東門米粉攤 新竹"},
-{id:"acheng",name:"阿城米粉",lat:24.8039,lng:120.9659,g:"https://www.google.com/maps/search/?api=1&query=阿城米粉 新竹"},
-{id:"datong",name:"大同米粉湯",lat:24.8134,lng:120.9721,g:"https://www.google.com/maps/search/?api=1&query=大同米粉湯 新竹"},
-{id:"dingpu",name:"頂埔米粉湯",lat:24.76091,lng:120.92934,g:"https://www.google.com/maps/place/頂埔米粉湯"}
+/* 新竹火車站 */
+{id:"dongmen",zh:"東門米粉攤",en:"Dongmen Market Rice Noodles",lat:24.8046,lng:120.9715},
+{id:"acheng",zh:"阿城米粉",en:"A-Cheng Rice Noodles",lat:24.8039,lng:120.9659},
+{id:"datong",zh:"大同米粉湯",en:"Datong Rice Noodle Soup",lat:24.8134,lng:120.9721},
+
+/* 北新竹站 */
+{id:"linji",zh:"林記米粉湯",en:"Lin's Rice Noodles",lat:24.8139,lng:120.9866},
+{id:"zhubei_old",zh:"老牌米粉湯",en:"Old Brand Rice Noodles",lat:24.8155,lng:120.9851},
+
+/* 香山站 */
+{id:"xiangshan_old",zh:"香山老店米粉湯",en:"Xiangshan Old Rice Noodles",lat:24.7646,lng:120.9104},
+
+/* 竹北站 */
+{id:"zhubei_cheng",zh:"正宗竹北米粉湯",en:"Zhubei Classic Rice Noodles",lat:24.8388,lng:121.0094},
+{id:"zhubei_liu",zh:"劉家米粉湯",en:"Liu’s Rice Noodles",lat:24.8374,lng:121.0112}
 ];
 
-const map=L.map("map").setView([24.8039,120.9698],14);
+const map=L.map("map").setView([24.805,120.97],13);
 L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:19}).addTo(map);
 
-/* ===== 本機評分 ===== */
-function getLocal(id){
-return Number(localStorage.getItem("rate_"+id)||0);
-}
-function setLocal(id,v){
-localStorage.setItem("rate_"+id,v);
-}
+shops.forEach(s=>{
+  const m=L.marker([s.lat,s.lng]).addTo(map);
+  m.bindPopup(`
+    <b>${lang==="zh"?s.zh:s.en}</b><br>
+    <a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(s.zh)}" target="_blank">
+    Google Maps
+    </a>
+  `);
+  m.on("click",()=>{
+    map.setView([s.lat,s.lng],17);
+    m.openPopup();
+  });
+});
 
-/* ===== 星星 UI ===== */
-function starHTML(id){
-let v=getLocal(id);
-let h='<div class="star" data-id="'+id+'">';
-for(let i=1;i<=5;i++){
-h+=`<span class="${i<=v?'active':''}">★</span>`;
-}
-h+='</div>';
-return h;
-}
-
-/* ===== 公開平均 ===== */
-let publicRate={};
-
-fetch("【在這裡貼 Google Sheets CSV 連結】")
+/* ===== 從 Google Sheets 讀取評分 ===== */
+fetch("【你的 Google Sheets CSV 連結】")
 .then(r=>r.text())
 .then(t=>{
-const rows=t.trim().split("\n").slice(1);
-rows.forEach(r=>{
-const [id,s]=r.split(",");
-if(!publicRate[id])publicRate[id]={sum:0,count:0};
-publicRate[id].sum+=Number(s);
-publicRate[id].count++;
-});
-});
+  const rows=t.trim().split("\n").slice(1);
+  const stat={};
 
-/* ===== Popup ===== */
-function popupContent(s){
-const p=publicRate[s.id];
-const avg=p?(p.sum/p.count).toFixed(1):"尚無";
-const cnt=p?p.count:0;
+  rows.forEach(r=>{
+    const [id,star]=r.split(",");
+    if(!stat[id])stat[id]={sum:0,count:0};
+    stat[id].sum+=Number(star);
+    stat[id].count++;
+  });
 
-return `
-<b>${s.name}</b><br>
-公開平均：⭐ ${avg}（${cnt} 人）<br>
-你的評分：${starHTML(s.id)}
-<a href="${s.g}" target="_blank">Google Maps</a>
-`;
-}
-
-/* ===== Marker ===== */
-shops.forEach(s=>{
-const m=L.marker([s.lat,s.lng]).addTo(map);
-m.on("click",()=>{
-m.bindPopup(popupContent(s)).openPopup();
-map.setView([s.lat,s.lng],17);
-setTimeout(()=>{
-document.querySelectorAll(".star span").forEach((sp,i)=>{
-sp.onclick=()=>{
-setLocal(s.id,i+1);
-m.bindPopup(popupContent(s)).openPopup();
-};
-});
-},50);
-});
+  document.getElementById("shopList").innerHTML=shops.map(s=>{
+    const d=stat[s.id];
+    const avg=d?(d.sum/d.count).toFixed(1):"—";
+    const cnt=d?d.count:0;
+    return `
+      <div class="item">
+        <b>${lang==="zh"?s.zh:s.en}</b><br>
+        <span class="stars">⭐ ${avg}</span>（${cnt}）
+      </div>
+    `;
+  }).join("");
 });
 </script>
 
