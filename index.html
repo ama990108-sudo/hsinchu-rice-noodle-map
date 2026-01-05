@@ -181,26 +181,38 @@ function starUI(id){
 }
 
 function renderList(){
-  const el=document.getElementById("shopList");
-  el.innerHTML=shops.map(s=>`
-    <div class="item">
-      <h3>${lang==="zh"?s.zh.name:s.en.name}</h3>
-      <p>${lang==="zh"?s.zh.desc:s.en.desc}</p>
-      ${starUI(s.id)}
-      <div class="links"><a href="${s.g}" target="_blank">Google Maps</a></div>
-    </div>
-  `).join("");
+  const el = document.getElementById("shopList");
+
+  el.innerHTML = shops.map(s=>{
+    const r = getRating(s.id);
+    return `
+      <div class="item">
+        <h3>${lang==="zh"?s.zh.name:s.en.name}</h3>
+        <p>${lang==="zh"?s.zh.desc:s.en.desc}</p>
+
+        <p>
+          平均評分：<b>${r.avg}</b> ⭐
+          （${r.count} 人）
+        </p>
+
+        ${starUI(s.id)}
+
+        <div class="links">
+          <a href="${s.g}" target="_blank">Google Maps</a>
+        </div>
+      </div>
+    `;
+  }).join("");
 
   document.querySelectorAll(".stars").forEach(st=>{
     st.querySelectorAll("span").forEach((sp,i)=>{
-      sp.onclick=()=>{
-        localStorage.setItem("rate_"+st.dataset.id,i+1);
+      sp.onclick = ()=>{
+        setRating(st.dataset.id, i+1);
         renderList();
       };
     });
   });
 }
-
 /* ===== 語言切換 ===== */
 function applyLang(){
   document.getElementById("title").textContent=lang==="zh"?"新竹米粉地圖":"Hsinchu Rice Noodle Map";
