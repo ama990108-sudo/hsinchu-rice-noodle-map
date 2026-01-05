@@ -134,13 +134,21 @@ const shops=[
 {id:"zhubei_liu",zh:"劉家米粉湯",en:"Liu’s Rice Noodles",lat:24.8374,lng:121.0112}
 ];
 
+/* ===== 地圖初始化 ===== */
 const map = L.map("map", {
   zoomControl: true,
   preferCanvas: true
-}).setView([24.805,120.97], 15);
-shops.forEach(s=>{
-  const m = L.marker([s.lat, s.lng]).addTo(map);
+}).setView([24.805, 120.97], 15);
 
+/* ===== 地圖瓦片（一定要在 marker 前面） ===== */
+L.tileLayer(
+  "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+  {
+    maxZoom: 19,
+    detectRetina: true, // 手機會更清楚
+    attribution: "© OpenStreetMap"
+  }
+).addTo(map);
   const popupContent = `
     <b>${lang==="zh"?s.zh:s.en}</b><br>
     <a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(s.zh)}" target="_blank">
