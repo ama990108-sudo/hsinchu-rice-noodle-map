@@ -18,7 +18,6 @@ body{
   margin:0;
   font-family:-apple-system,BlinkMacSystemFont,"PingFang TC","Noto Sans TC","Microsoft JhengHei",sans-serif;
   background:var(--bg);
-  color:#222;
 }
 header{
   background:var(--red);
@@ -28,16 +27,6 @@ header{
   align-items:center;
 }
 header h1{margin:0;font-size:1.2rem}
-header .spacer{flex:1}
-header button{
-  background:#fff;
-  color:var(--red);
-  border:none;
-  border-radius:20px;
-  padding:6px 14px;
-  font-weight:700;
-  cursor:pointer;
-}
 #map{height:60vh}
 
 main{
@@ -46,13 +35,12 @@ main{
   padding:16px;
 }
 .panel{
-  background:var(--card);
+  background:#fff;
   border-radius:16px;
   box-shadow:0 4px 12px rgba(0,0,0,.08);
   padding:16px;
   margin-bottom:16px;
 }
-.panel h2{margin-top:0}
 .list{
   display:grid;
   grid-template-columns:1fr;
@@ -66,27 +54,16 @@ main{
   border-radius:12px;
   padding:12px;
 }
-.stars{color:var(--star);font-weight:700;font-size:1.05rem}
-.links a{
-  color:var(--red);
-  font-weight:700;
-  text-decoration:none;
-}
-.footer{
-  text-align:center;
-  font-size:.85rem;
-  color:#666;
-  margin-bottom:20px;
-}
+.stars{color:var(--star);font-weight:700}
+a{color:var(--red);font-weight:700;text-decoration:none}
+.footer{text-align:center;font-size:.85rem;color:#666;margin-bottom:20px}
 </style>
 </head>
 
 <body>
 
 <header>
-  <h1 id="title">新竹米粉地圖</h1>
-  <div class="spacer"></div>
-  <button id="langBtn">EN</button>
+  <h1>新竹米粉地圖</h1>
 </header>
 
 <div id="map"></div>
@@ -94,84 +71,67 @@ main{
 <main>
 
 <section class="panel">
-<h2 id="rateTitle">🍜 店家評分</h2>
+<h2>🍜 米粉店評分（即時）</h2>
 <div class="list" id="shopList"></div>
 </section>
 
 <section class="panel">
-<h2 id="formTitle">📝 我要評分</h2>
-<a id="formLink" href="【你的 Google 表單連結】" target="_blank">
-👉 前往 Google 表單填寫評分
+<h2>📝 我要評分</h2>
+<a href="【在這裡貼你的 Google 表單連結】" target="_blank">
+👉 點我填寫 Google 表單
 </a>
 </section>
 
 </main>
 
 <div class="footer">
-© Hsinchu Rice Noodle Map｜資料持續更新中
+© Hsinchu Rice Noodle Map
 </div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 <script>
-let lang="zh";
-
+/* ===== 店家資料 ===== */
 const shops=[
-/* 新竹火車站 */
-{id:"dongmen",zh:"東門米粉攤",en:"Dongmen Market Rice Noodles",lat:24.8046,lng:120.9715},
-{id:"acheng",zh:"阿城米粉",en:"A-Cheng Rice Noodles",lat:24.8039,lng:120.9659},
-{id:"datong",zh:"大同米粉湯",en:"Datong Rice Noodle Soup",lat:24.8134,lng:120.9721},
-
-/* 北新竹站 */
-{id:"linji",zh:"林記米粉湯",en:"Lin's Rice Noodles",lat:24.8139,lng:120.9866},
-{id:"zhubei_old",zh:"老牌米粉湯",en:"Old Brand Rice Noodles",lat:24.8155,lng:120.9851},
-
-/* 香山站 */
-{id:"xiangshan_old",zh:"香山老店米粉湯",en:"Xiangshan Old Rice Noodles",lat:24.7646,lng:120.9104},
-
-/* 竹北站 */
-{id:"zhubei_cheng",zh:"正宗竹北米粉湯",en:"Zhubei Classic Rice Noodles",lat:24.8388,lng:121.0094},
-{id:"zhubei_liu",zh:"劉家米粉湯",en:"Liu’s Rice Noodles",lat:24.8374,lng:121.0112}
+{id:"dongmen",name:"東門米粉攤",lat:24.8046,lng:120.9715},
+{id:"acheng",name:"阿城米粉",lat:24.8039,lng:120.9659},
+{id:"datong",name:"大同米粉湯",lat:24.8134,lng:120.9721},
+{id:"linji",name:"林記米粉湯",lat:24.8139,lng:120.9866},
+{id:"xiangshan",name:"香山老店米粉湯",lat:24.7646,lng:120.9104},
+{id:"zhubei1",name:"正宗竹北米粉湯",lat:24.8388,lng:121.0094},
+{id:"zhubei2",name:"劉家米粉湯",lat:24.8374,lng:121.0112}
 ];
 
-/* ===== 地圖初始化 ===== */
-const map = L.map("map", {
-  zoomControl: true,
-  preferCanvas: true
-}).setView([24.805, 120.97], 15);
+/* ===== 地圖 ===== */
+const map = L.map("map").setView([24.805,120.97],15);
 
-/* ===== 地圖瓦片（一定要在 marker 前面） ===== */
-L.tileLayer(
-  "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
-  {
-    maxZoom: 19,
-    detectRetina: true, // 手機會更清楚
-    attribution: "© OpenStreetMap"
-  }
-).addTo(map);
-  const popupContent = `
-    <b>${lang==="zh"?s.zh:s.en}</b><br>
-    <a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(s.zh)}" target="_blank">
+L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{
+  maxZoom:19,
+  detectRetina:true
+}).addTo(map);
+
+/* ===== Marker ===== */
+shops.forEach(s=>{
+  const m=L.marker([s.lat,s.lng]).addTo(map);
+
+  m.bindPopup(`
+    <b>${s.name}</b><br>
+    <a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(s.name)}" target="_blank">
       Google Maps
     </a>
-  `;
+  `);
 
-  m.bindPopup(popupContent, { closeButton: true });
-
-  m.on("click", () => {
-    map.flyTo([s.lat, s.lng], 17, {
-      animate: true,
-      duration: 0.6
-    });
+  m.on("click",()=>{
+    map.flyTo([s.lat,s.lng],17,{animate:true});
     m.openPopup();
   });
 });
 
 /* ===== 從 Google Sheets 讀取評分 ===== */
-fetch("【你的 Google Sheets CSV 連結】")
+fetch("【在這裡貼 Google Sheets 的 CSV 連結】")
 .then(r=>r.text())
-.then(t=>{
-  const rows=t.trim().split("\n").slice(1);
+.then(text=>{
+  const rows=text.trim().split("\n").slice(1);
   const stat={};
 
   rows.forEach(r=>{
@@ -187,8 +147,8 @@ fetch("【你的 Google Sheets CSV 連結】")
     const cnt=d?d.count:0;
     return `
       <div class="item">
-        <b>${lang==="zh"?s.zh:s.en}</b><br>
-        <span class="stars">⭐ ${avg}</span>（${cnt}）
+        <b>${s.name}</b><br>
+        <span class="stars">⭐ ${avg}</span>（${cnt} 人）
       </div>
     `;
   }).join("");
