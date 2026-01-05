@@ -33,16 +33,10 @@
 </header>
 
 <div id="map"></div>
-<section id="ratings">
-  <h2>⭐ 米粉店評分｜Rice Noodle Ratings</h2>
-
-  <div class="shop-rating">
     <h3>城隍廟 阿城米粉</h3>
     <p>
-      平均評分：<span id="avg-acheng">載入中...</span> ⭐
-      （<span id="count-acheng">0</span> 人評分）
     </p>
-    <a href="【貼你的Google表單連結】" target="_blank">
+    <a href="【https://docs.google.com/forms/d/e/1FAIpQLSc30CvEspcBPhKd2W_ylALFxNIFLKsiv2afyXhGM674qEzFVQ/viewform】" target="_blank">
       我要評分、留下意見 / Rate this shop or leave a comment
     </a>
   </div>
@@ -58,18 +52,15 @@
   </section>
 
   <section class="panel">
-    <h2 id="listTitle">🍜 店家清單（可評分）</h2>
+    <h2 id="listTitle">🍜 店家清單</h2>
     <div class="list" id="shopList"></div>
   </section>
 
   <section class="panel">
-    <h2 id="fbTitle">💬 意見回饋</h2>
-    <p id="fbDesc">此回饋僅儲存在你的瀏覽器（local）。</p>
   </section>
 </main>
 
 <footer>
-  <p id="foot">提示：評分與回饋使用瀏覽器 localStorage，重新整理仍會保留。</p>
 </footer>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -166,11 +157,10 @@
     document.getElementById('routeDesc').textContent = lang==='zh'
       ?'以新竹火車站與城隍廟為核心，步行可達的經典米粉店。點擊地圖紅點可查看並前往 Google 地圖。'
       :'Walkable classic rice noodle shops around Hsinchu Train Station and Chenghuang Temple. Click red markers for Google Maps.';
-    document.getElementById('listTitle').textContent = lang==='zh'?'🍜 店家清單（可評分）':'🍜 Shop List (Rate it)';
-    document.getElementById('fbTitle').textContent = lang==='zh'?'💬 意見回饋':'💬 Feedback';
-    document.getElementById('fbDesc').textContent = lang==='zh'?'此回饋僅儲存在你的瀏覽器（local）。':'Feedback is stored locally in your browser.';
+    document.getElementById('listTitle').textContent = lang==='zh'?'🍜 店家清單':'🍜 Shop List ';
+    document.getElementById('fbTitle').textContent = lang==='zh'?'
+    document.getElementById('fbDesc').textContent = lang==='zh'?'
     document.getElementById('foot').textContent = lang==='zh'
-      ?'提示：評分與回饋使用瀏覽器 localStorage，重新整理仍會保留。'
       :'Tip: Ratings and feedback are saved locally via localStorage.';
     document.getElementById('langBtn').textContent = lang==='zh'?'EN':'中文';
     renderMarkers(); renderList();
@@ -184,7 +174,6 @@
   applyLang();
 </script>
 <script>
-fetch("【貼你的Google Sheets CSV 連結】")
   .then(res => res.text())
   .then(text => {
     const rows = text.split("\n");
